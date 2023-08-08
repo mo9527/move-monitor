@@ -5,7 +5,7 @@ block_cipher = None
 
 
 a = Analysis(
-    ['camera_monitor_video.py'],
+    ['move_monitor_video.py'],
     pathex=[],
     binaries=[],
     datas=[],

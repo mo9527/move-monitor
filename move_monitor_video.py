@@ -160,10 +160,8 @@ def destroy():
     
 
 def update_button_state(enable = True):
-    if enable:
-        start_button.configure(state="normal")
-    else:
-        start_button.configure(state="disabled")
+    start_button.configure(state="normal" if enable else 'disabled')
+    
 
 start_button = ttk.Button(window, command=start, text='开始')
 start_button.pack(padx=40, pady= 4, side=LEFT)

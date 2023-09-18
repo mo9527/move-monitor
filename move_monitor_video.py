@@ -6,13 +6,14 @@ import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from threading import Thread
 from threading import Timer
+import os
+import sys
 
 # 全局变量
 camera_fps=30
 size=()
 move_frame_cache = []
 stop_flag = False
-
 
 # 创建主窗口
 window = ttk.Window()
@@ -30,21 +31,34 @@ def center_window(w, h):
     y = (hs / 2) - (h / 2)
     window.geometry('%dx%d+%d+%d' % (w, h, x, y))
 
-center_window(380, 100)
+center_window(390, 150)
+
+msg_label_str = ttk.StringVar()
+
+#程序主目录
+main_path = os.path.split( os.path.realpath( sys.argv[0] ) )[0]
+
+
+def show_msg(text="None"):
+    msg_label_str.set(text)
+    
 
 def flush_cache_into_file():
     global move_frame_cache
-    if len(move_frame_cache) < 10:
+    if len(move_frame_cache) < 5:
+        show_msg("主程序目录" + main_path)
         return
+    
     temp_frame_cache = move_frame_cache.copy()
     move_frame_cache = []
     video_file_name = str(time.strftime('%Y_%m_%d--%H_%M_%S', time.localtime(time.time())))
     # 定义编解码器并创建VideoWriter对象
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    out = cv2.VideoWriter(f'./video/{video_file_name}.mp4', fourcc, camera_fps, size)
+    out = cv2.VideoWriter(f'{main_path}/video/{video_file_name}.mp4', fourcc, camera_fps, size)
     for frame in temp_frame_cache:
         out.write(frame)
     print('写入视频文件结束')
+    show_msg('写入视频文件结束')
     out.release()
 
 
@@ -137,6 +151,7 @@ def begin_monitor():
     print('camera 释放')
     cv2.destroyAllWindows()
     print('关闭视频窗口')
+    show_msg('关闭视频窗口')
     stop_flag = False
     flush_cache_into_file()
 
@@ -150,6 +165,7 @@ def start():
         monitor_t = Thread(target=begin_monitor, daemon=False, name='监视器线程')
         monitor_t.start()
     
+    show_msg('开始')
     
 def destroy():
     global stop_flag
@@ -164,13 +180,16 @@ def update_button_state(enable = True):
     
 
 start_button = ttk.Button(window, command=start, text='开始')
-start_button.pack(padx=40, pady= 4, side=LEFT)
+start_button.pack(padx=35, pady= 10, side=LEFT, anchor='n')
 
 flush_button = ttk.Button(window, command=flush_cache_into_file, text='刷新', bootstyle=LIGHT)
-flush_button.pack(padx=30, pady= 4, side=LEFT)
+flush_button.pack(padx=35, pady= 10, side=LEFT, anchor='n')
 
 close_button = ttk.Button(window, command=destroy, text='关闭', bootstyle='danger')
-close_button.pack(padx=30, pady= 4, side=LEFT)
+close_button.pack(padx=35, pady= 10, side=LEFT, anchor='n')
+
+msg_label = ttk.Entry(window, text=msg_label_str, width = 35, state='disabled')
+msg_label.place(x=35, y=70)
 
 def window_destroy():
     destroy()
